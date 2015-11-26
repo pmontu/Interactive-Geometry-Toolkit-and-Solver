@@ -1,0 +1,110 @@
+  <html>
+  <head>
+    <script>
+    function init() {
+      var stage = new createjs.Stage("interactive_geometry_toolkit");
+      var width = stage.canvas.width;
+      var height = stage.canvas.height;
+
+      var area = 0;
+
+      var p1 = new createjs.Shape();
+      p1.graphics.beginFill("red").drawCircle(0, 0, 10);
+      p1.x = 0;
+      p1.y = 100;
+      stage.addChild(p1);
+
+      var p2 = new createjs.Shape();
+      p2.graphics.beginFill("blue").drawCircle(0, 0, 10);
+      p2.x = 200;
+      p2.y = 100;
+      stage.addChild(p2);
+
+      var p3 = new createjs.Shape();
+      p3.graphics.beginFill("green").drawCircle(0, 0, 10);
+      p3.x = 100;
+      p3.y = 200;
+      stage.addChild(p3);
+
+      p1.on("pressmove", movefn);
+      p2.on("pressmove", movefn);
+      p3.on("pressmove", movefn);
+
+      updateLine()
+
+      function addLine() {
+
+        var line = new createjs.Shape();
+        var g = line.graphics;
+        g.beginStroke("black").setStrokeStyle(3);
+        g.moveTo(p1.x, p1.y);
+        g.lineTo(p2.x, p2.y).lineTo(p3.x, p3.y)
+        g.lineTo(p1.x, p1.y).endStroke();
+        stage.addChild(line);
+
+        addText();
+      }
+
+      function addText() {
+
+        var text1 = getText(p1,p2);
+        stage.addChild(text1);
+        var text2 = getText(p2,p3);
+        stage.addChild(text2);
+        var text3 = getText(p3,p1);
+        stage.addChild(text3);
+      }
+
+      function getText(p1,p2){
+        var sx = p1.x
+        if(p2.x < p1.x){
+          sx = p2.x
+        }
+        var sy = p1.y;
+        if(p2.y < p1.y){
+          sy = p2.y
+        }
+        var a = new createjs.Point(sx + Math.abs(p2.x - p1.x) / 2, sy + Math.abs(p2.y - p1.y) / 2);
+        var d = Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
+        var text = new createjs.Text((d/10).toFixed(2), "20px Arial", "#ff7700");
+        text.x = a.x;
+        text.y = a.y;
+        text.textBaseline = "alphabetic";
+        return text;
+      }
+
+      function movefn(evt) {
+        evt.target.x = evt.stageX;
+        evt.target.y = evt.stageY;
+        console.log(evt.target.x + " " + evt.target.y)
+        updateLine()
+      }
+
+      function updateLine() {
+        for(var i=stage.children.length;i>2;i--){
+          stage.removeChildAt(i);
+        }
+        addLine();
+        calculateArea()
+        stage.update();
+      }
+
+      function calculateArea() {
+        var area = (p1.x * (p2.y + p3.y) + p2.x * (p3.y + p1.y) + p3.x * (p1.y + p2.y)) / 100;
+        $("#area").val(area)
+      }
+
+    }
+    </script>
+    <script src= "easeljs-0.8.1.min.js"></script>
+    <script src= "jquery-2.1.4.min.js"></script>
+    <style>
+    canvas {border-style: solid; border-width:1px;}
+    </style>
+    <body onLoad="init()">
+      <canvas id="interactive_geometry_toolkit" width=300 height=300>
+      </canvas>
+    </body>
+    <br>
+    <input type="text" id="area" value="10"/>
+    </html>
